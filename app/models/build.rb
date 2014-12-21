@@ -154,11 +154,19 @@ class Build < ActiveRecord::Base
   end
 
   def project
-    commit.project
+    if commit.present?
+      commit.project
+    else
+      # on installations upgraded from older version of GitLab CI
+      # builds do not have commit relation, resulting in errors
+      # this is a fallback mechanism
+      job.project
+    end
   end
 
   def project_id
-    commit.project_id
+    # see notes for .project
+    commit.present? ? commit.project_id : job.project_id
   end
 
   def project_name
